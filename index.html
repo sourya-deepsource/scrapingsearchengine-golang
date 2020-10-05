@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<meta charset="utf-8">
+	<title>search</title>
+	<meta name="robots" content="nofollow">
+  	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+	<style>
+	  .body{
+  		margin: 0;
+ 	    padding: 0;
+	  }
+
+	  .main {
+  		position: absolute;
+  		top: 300px;
+  		left: 50%;
+  		transform: translate(-50%, -59%);
+	   }
+
+	  .inp {
+  		width: 450px;
+  		height: 45px;
+  		border-radius: 30px;
+  		border: 2px solid rgb(0, 0, 0);
+	   }
+
+	  .btn {
+  		width: 45px;
+  		height: 45px;
+  		border-radius: 50%;
+  		position: absolute;
+  		left: 90%;
+  		border: 2px solid rgb(0, 0, 0);
+	  }
+	</style>
+  </head>
+  <body>
+	<a href="index.html" type="button">aa</a>
+  	<div class="main">
+  	  <h1 class="top1">Search</h1>
+  	  <form action="http://localhost:8080/home/search" method="get">
+  	  	<input class="inp" type="search" name="keyword" placeholder="keyword input">
+  	  	<button class="btn" type="sumbit"><i class="fas fa-search"></i></button>
+  	  </form>
+    </div>
+  	<div class="sub1">
+  	  <div class="sub1kako">
+  	  	<button><i class="fas fa-cog"></i></button>
+  	  </div>
+  	</div>
+  </body>
+</html>

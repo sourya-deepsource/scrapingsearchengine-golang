@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>search - {{.Mese}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        transform: translate(-50%, -59%);
+        font-family: "Microsoft Sans Serif";
+      }
+      .inp {
+        width: 450px;
+        height: 45px;
+        border-radius: 30px;
+        border: 2px solid rgb(0, 0, 0);
+      }
+      .btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        position: absolute;
+        left: 90%;
+        border: 2px solid rgb(0, 0, 0);
+      } 
+      .zyou{
+        width: 420px;
+        height: 95px;
+        border-radius: 20px;
+        border:2px solid rgb(0, 0, 0);
+      }
+    </style>
+  </head>
+  <body>
+    <h2>search</h2>
+      <form action="http://localhost:8080/home/search" method="get">
+        <input class="inp" type="search" name="keyword" placeholder="keyword input">
+        <button class="btn" type="sumbit"><i class="fas fa-search"></i></button>
+      </form>
+    <p>{{.Mese}}</p>
+    <div class="sub">{{.InformationSets}}</div>
+  </body>
+</html>
