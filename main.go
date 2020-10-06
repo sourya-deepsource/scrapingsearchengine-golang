@@ -1,75 +1,146 @@
 package main
 
 import (
-	"database/sql"
-	"log"
-	"net/http"
-	"text/template"
-	_ "github.com/go-sql-driver/mysql"
+  "log"
+  "net/http"
+  "io/ioutil"
+  "strings"
+  "golang.org/x/net/html"
+  "database/sql"
+  _ "github.com/go-sql-driver/mysql"
 )
 
-type Information struct {
-  StructTitle       string
-  StructHost        string
-  StructExplanation string
-}
-
-func CheckError(err error) {
+func Error(err error){
   if err != nil {
-	  log.Fatal(err)
+	log.Fatal(err)
   }
 }
 
-func main() {
-  http.HandleFunc("/home", topfunc)
-  http.HandleFunc("/home/search", resultfunc)
-  http.ListenAndServe(":8080", nil)
+func main(){
+  url := "http://www.tohoho-web.com/"
+  geturlfunc(url)
 }
 
-func topfunc(w http.ResponseWriter, r *http.Request) {
-  indexFile, _ := template.ParseFiles("index.html")
-  indexFile.Execute(w, "index.html")
-}
-
-func resultfunc(w http.ResponseWriter, r *http.Request) {
-  searchFile, _ := template.ParseFiles("search.html")
-  getinp := r.FormValue("keyword")
-  myresult := mysqlopenfunc(getinp)
-  htmlinsert := struct {
-    Mese            string
-    InformationSets string
-  }{
-    Mese: getinp,
-    InformationSets: myresult,
+func geturlfunc(url string){
+  resp, err := http.Get(url)
+  Error(err)
+  defer resp.Body.Close()
+  body, err := ioutil.ReadAll(resp.Body)
+  htmltoken := html.NewTokenizer(strings.NewReader(string(body)))
+  for{
+	tt := htmltoken.Next()
+	switch tt{
+	  case html.EndTagToken:
+		return
+	  case html.StartTagToken:
+		t := htmltoken.Token()
+		if t.Data == "a"{
+		  for _, v := range t.Attr{
+			sh := strings.HasPrefix(v.Val,"#")
+			if sh == false{
+			  http := strings.HasPrefix(v.Val ,"http")
+			  if http == false{
+				host := strings.HasPrefix(v.Val ,url)
+				switch host{
+				  case false:
+					sc := strings.HasSuffix(v.Val, "/")
+					switch sc{
+					  case false:
+						sc2 := strings.HasPrefix(v.Val, "/")
+						switch sc2{
+						  case true:
+							acquisitionfunc(url + "/" + v.Val)
+						  case false:
+							acquisitionfunc(url + v.Val)	
+						}
+					  case true:
+						acquisitionfunc(url + v.Val)
+					}
+				  default:
+					acquisitionfunc(v.Val)
+				}
+			  }
+			}
+		  }
+		}
+	}
   }
-  searchFile.ExecuteTemplate(w, "search.html", htmlinsert)
 }
 
-func mysqlopenfunc(getinp string)string{
+type Information struct{
+  Titles       string
+  Hosts        string
+  Explanations string
+}
+
+func acquisitionfunc(url string){
+  resp, err := http.Get(url)
+  Error(err)
+  defer resp.Body.Close()
+  body, err := ioutil.ReadAll(resp.Body)
+  Error(err)
+  z := html.NewTokenizer(strings.NewReader(string(body)))
+  titles := titlegetfunc(z)
+  descriptions := descriptiongetfunc(z)
+  ke := Information{titles, url, descriptions}
+  ke.databaseinsertfunc()
+}
+
+func titlegetfunc(ztitle *html.Tokenizer)(titilereturn string){
+  for{
+	tt := ztitle.Next()
+	switch tt{
+	  case html.ErrorToken:
+		return
+	  case html.StartTagToken:
+		t := ztitle.Token()
+		if t.Data == "title"{
+		  ztitle.Next()
+		  i := ztitle.Token()
+		  return i.Data
+		}
+	}
+  }
+}
+
+func descriptiongetfunc(zdescription *html.Tokenizer)(descriptionreturn string){
+  for{
+	tt := zdescription.Next()
+	switch tt{
+	  case html.ErrorToken:
+		return
+	  case html.StartTagToken:
+		t := zdescription.Token()
+		c := t.Data == "p"
+		switch c{
+		  case true:
+			zdescription.Next()
+			i := zdescription.Token()
+			return i.Data
+		  case false:
+			if t.Data == "meta"{
+			  for _, v := range t.Attr{
+				if v.Key == "name"{
+				  if v.Val == "description"{
+					for _, v := range t.Attr{
+					  if v.Key == "content"{
+						return v.Val
+					  }
+					}
+				  }
+				}
+			  }
+			}
+		}
+	}
+  }
+}
+
+func (accept Information) databaseinsertfunc(){
   db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/search")
-  CheckError(err)
+  Error(err)
   defer db.Close()
-  //I could only come up with a slightly cumbersome way to write it (LOL
-  mysqlstatementLIKE := "SELECT * FROM search WHERE title LIKE'%" + getinp + "%';"
-  mysqlsearch, err := db.Query(mysqlstatementLIKE) //Cognitively, a mysql statement!
-  CheckError(err)
-  defer mysqlsearch.Close()
-  var (
-    dbtitle     string
-    dburl       string
-    dbsetu      string
-    slicestruct []Information//
-  )
-  for mysqlsearch.Next(){
-    err := mysqlsearch.Scan(&dbtitle, &dburl, &dbsetu)
-    CheckError(err)
-    slicestruct = append(slicestruct, Information{StructTitle: dbtitle, StructHost: dburl, StructExplanation: dbsetu})
-  }
-  //The process of producing and returning the html code
-  htmlcodes := ``
-  for _,v := range slicestruct {
-    htmlcodes += `<div class="zyou"><a href="`+ v.StructHost +`"><h3>`+ v.StructTitle +`</h3><a href="`+ v.StructHost +`">`+ v.StructHost +`</a><p>`+ v.StructExplanation +`</p></a></div>`
-    //postscript  code: div.zyou/a/h3 && a && p
-  }
-  return htmlcodes
+  informationinsert, err := db.Prepare("INSERT INTO search(title,url,setu) VALUES(?,?,?)")
+  Error(err)
+  informationinsert.Exec(accept.Titles, accept.Hosts, accept.Explanations)
 }
