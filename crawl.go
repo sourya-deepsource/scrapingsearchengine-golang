@@ -17,7 +17,7 @@ func Error(err error){
 }
 
 func main(){
-  url := "#"//Please put up a url for a site you can scrape hereWe won't take responsibility for any problems that may arise.
+  url := "http://www.tohoho-web.com/"
   geturlfunc(url)
 }
 
