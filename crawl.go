@@ -17,7 +17,7 @@ func Error(err error){
 }
 
 func main(){
-  url := "http://www.tohoho-web.com/"
+  url := "#"
   geturlfunc(url)
 }
 
