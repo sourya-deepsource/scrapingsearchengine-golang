@@ -6,7 +6,6 @@ import (
   "text/template"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
-  "fmt"
 )
 
 type Information struct {
@@ -46,9 +45,6 @@ func resultfunc(w http.ResponseWriter, r *http.Request) {
   searchFile.ExecuteTemplate(w, "search.html", htmlinsert)
 }
 
-type Slicenilif interface {
-}
-
 func mysqlopenfunc(getinp string)string{
   if getinp == "" {
     return `<div class="noinput"><h1>Warning</h1><p>Please insert keywords!</p></div>`
@@ -71,7 +67,6 @@ func mysqlopenfunc(getinp string)string{
     err := mysqlsearch.Scan(&dbtitle, &dburl, &dbsetu)
     CheckError(err)
     slicestruct = append(slicestruct, Information{StructTitle: dbtitle, StructHost: dburl, StructExplanation: dbsetu})
-    fmt.Println(Slicenilif(slicestruct))
   }
   //The process of producing and returning the html code
   htmlcodes := ``
