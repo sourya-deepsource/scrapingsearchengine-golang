@@ -49,7 +49,7 @@ func mysqlopenfunc(getinp string)string{
   if getinp == "" {
     return `<div class="noinput"><h1>Warning</h1><p>Please insert keywords!</p></div>`
   }
-  db, err := sql.Open("mysql", "root:xzAinagithub@tcp(127.0.0.1:3306)/search")
+  db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/search")
   CheckError(err)
   defer db.Close()
   //I could only come up with a slightly cumbersome way to write it (LOL
